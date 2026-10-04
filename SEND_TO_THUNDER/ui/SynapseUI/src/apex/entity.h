@@ -123,12 +123,10 @@ struct LocalPlayer : public Entity {
 inline uintptr_t getEntityPtr(const Mem& mem, int i) {
     uintptr_t chunk = mem.rpm<uintptr_t>(
         mem.base + Offsets::kEntityList + (uintptr_t)(i >> 6) * 8);
-    if (chunk) {
-        uintptr_t p = mem.rpm<uintptr_t>(chunk + (uintptr_t)(i & 0x3F) * 8);
-        if (p && (p >> 48) == 0) return p;
-    }
-    return mem.rpm<uintptr_t>(
-        mem.base + Offsets::kEntityList + (uintptr_t)i * Offsets::kEntityStride);
+    if (!chunk) return 0;
+    uintptr_t p = mem.rpm<uintptr_t>(chunk + (uintptr_t)(i & 0x3F) * 8);
+    if (!p || (p >> 48) != 0) return 0;
+    return p;
 }
 
 inline std::vector<Entity> readEntities(Mem& mem, const LocalPlayer& lp,
@@ -141,7 +139,7 @@ inline std::vector<Entity> readEntities(Mem& mem, const LocalPlayer& lp,
         if (!ptr || ptr == lp.addr) continue;
 
         int hp = mem.rpm<int>(ptr + Offsets::DT_Player::m_iHealth);
-        if (hp <= 0 || hp > 150) continue;
+        if (hp <= 0 || hp > 500) continue;
 
         Entity e;
         e.read(mem, ptr, gameTime);

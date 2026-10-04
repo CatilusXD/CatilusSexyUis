@@ -17,6 +17,7 @@ static void runDiagnostics(Mem& mem) {
     lastRun = now;
 
     static bool first = true;
+    if (first) CreateDirectoryA("C:\\apexbuild", nullptr);
     FILE* f = fopen("C:\\apexbuild\\diag.txt", first ? "w" : "a");
     first = false;
     if (!f) return;
